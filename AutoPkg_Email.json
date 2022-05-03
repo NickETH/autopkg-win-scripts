@@ -1,0 +1,12 @@
+{
+    "AutoPkg_Email":  {
+                        "Sendto":  [
+                            "user@domain.org",
+							"user2@domain.com"
+                        ],
+                        "Sendfrom":  "PowerShell <AutoPkgUser@domain.org>",
+                        "Subject":  "AutoPKGwin-log",
+						"Server":  "server.yourorg.com",
+                        "Port":  587
+    }
+}
