@@ -4,6 +4,7 @@
 # In a third stage, we populate the MSITools folder and create a py.ini file
 # And finally, we install AutoPkg.msi for the current user.
 # Version 1.0 20220502, Nick Heim
+# Version 1.1 20231116, Nick Heim. Updated github download links, dotnet3 install
 
 # Could be neccessary:
 # [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Internet Explorer\Main]
@@ -25,7 +26,9 @@ if (-Not (Test-Path -Path $InstToolsFldr)) {
 
 # Install Python3 latest x64
 $DownloadFile = "Python3-x64.exe"
-$URL = (Invoke-WebRequest https://www.python.org/downloads/ -UseBasicParsing | Select -ExpandProperty links | ?  href -like "*exe*").href
+# $URL = (Invoke-WebRequest https://www.python.org/downloads/ -UseBasicParsing | Select -ExpandProperty links | ?  href -like "*exe*").href
+$URL = (Invoke-WebRequest https://www.python.org/downloads/windows/ -UseBasicParsing | Select -ExpandProperty links | ?  href -match ".*python-3.11.[0-9]+-amd64.exe").href[0]
+
 $request = Invoke-WebRequest -Uri "$URL" -OutFile $DownloadFile
 # Add the install command to the batch file
 Add-Content -Path AP-Prereq-Install.cmd -Value ($DownloadFile + " /quiet InstallAllUsers=1 PrependPath=1")
@@ -74,18 +77,23 @@ Add-Content -Path AP-Prereq-Install.cmd -Value ('powershell.exe ' + '"Expand-Arc
 
 # Activate DotNet 3.5 (get it online)
 # Add the install command to the batch file
-Add-Content -Path AP-Prereq-Install.cmd -Value ('powershell.exe ' + '"Enable-WindowsOptionalFeature -Online -FeatureName NetFx3 -Source D:\sources\sxs"')
+# Add-Content -Path AP-Prereq-Install.cmd -Value ('powershell.exe ' + '"Enable-WindowsOptionalFeature -Online -FeatureName NetFx3 -Source D:\sources\sxs"')
+Add-Content -Path AP-Prereq-Install.cmd -Value ('powershell.exe ' + '"Enable-WindowsOptionalFeature -Online -FeatureName NetFx3 -NoRestart"')
 
 # Install Wix Toolset
 $DownloadFile = "WixToolset.exe"
-$URL = ("https://github.com" + ((Invoke-WebRequest github.com/wixtoolset/wix3/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*wix3*.exe").href)
+$releases = "https://api.github.com/repos/wixtoolset/wix3/releases"
+$URL = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].assets.browser_download_url | where { $_ -Like "*wix3*.exe" }
+#$URL = ("https://github.com" + ((Invoke-WebRequest github.com/wixtoolset/wix3/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*wix3*.exe").href)
 $request = Invoke-WebRequest -Uri "$URL" -OutFile $DownloadFile
 # Add the install command to the batch file
 Add-Content -Path AP-Prereq-Install.cmd -Value ($DownloadFile + " /install /quiet /norestart")
 
 # Download and Advertise AutoPkg
 $DownloadFile = "AutoPkg.msi"
-$URL = ("https://github.com" + ((Invoke-WebRequest github.com/NickETH/autopkg/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*AutoPkg*.msi")[0].href)
+$releases = "https://api.github.com/repos/NickETH/autopkg/releases"
+$URL = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].assets.browser_download_url
+#$URL = ("https://github.com" + ((Invoke-WebRequest github.com/NickETH/autopkg/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*AutoPkg*.msi")[0].href)
 $request = Invoke-WebRequest -Uri "$URL" -OutFile $DownloadFile
 $MSIArguments = @(
     "/jm"
@@ -132,7 +140,7 @@ $URL = "https://gist.github.com/NickETH/acf4e01124a20cef0d45e0922e058fcb/archive
 $request = Invoke-WebRequest -Uri "$URL" -OutFile $DownloadFile
 Expand-Archive $DownloadFile -DestinationPath $UnzipTempFldr
 Move-Item -Path ($UnzipTempFldr + "\*\MultiMakeCab.vbs") -Destination $InstToolsFldr
-Remove-Item -Path$UnzipTempFldr -Recurse -Force
+Remove-Item -Path $UnzipTempFldr -Recurse -Force
 
 Start-Process -Wait -FilePath "msiexec.exe" -ArgumentList "/i AutoPkg.msi"
 Start-Process -Wait -FilePath "cmd.exe" -ArgumentList "/k cd C:\Tools\AutoPkg && autopkg.py"
