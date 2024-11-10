@@ -5,6 +5,7 @@
 # And finally, we install AutoPkg.msi for the current user.
 # Version 1.0 20220502, Nick Heim
 # Version 1.1 20231116, Nick Heim. Updated github download links, dotnet3 install
+# Version 1.2 20241110, Nick Heim. Updated github download link
 
 # Could be neccessary:
 # [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Internet Explorer\Main]
@@ -62,7 +63,7 @@ Add-Content -Path AP-Prereq-Install.cmd -Value ("msiexec.exe " + $MSIArguments)
 
 # Install the latest Git x64 Installer
 $DownloadFile = "Git-x64.exe"
-$URL = (((Invoke-WebRequest https://git-scm.com/download/win -UseBasicParsing).Links) | where -Property outerHTML -Match "64-bit Git for Windows Setup").href
+$URL = (((Invoke-WebRequest https://git-scm.com/downloads/win -UseBasicParsing).Links) | where -Property outerHTML -Match "64-bit Git for Windows Setup").href
 $request = Invoke-WebRequest -Uri "$URL" -OutFile $DownloadFile
 # Add the install command to the batch file
 Add-Content -Path AP-Prereq-Install.cmd -Value ($DownloadFile + ' /ALLUSERS /COMPONENTS="*ext,gitlfs,assoc,assoc_sh" /VERYSILENT')
