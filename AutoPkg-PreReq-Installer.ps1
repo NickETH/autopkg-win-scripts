@@ -5,7 +5,7 @@
 # And finally, we install AutoPkg.msi for the current user.
 # Version 1.0 20220502, Nick Heim
 # Version 1.1 20231116, Nick Heim. Updated github download links, dotnet3 install
-# Version 1.2 20241110, Nick Heim. Updated github download link
+# Version 1.2 20241110, Nick Heim. Updated github download link and speed up downloads
 
 # Could be neccessary:
 # [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Internet Explorer\Main]
@@ -24,6 +24,9 @@ $InstToolsFldr = "C:\Tools\MSITools"
 if (-Not (Test-Path -Path $InstToolsFldr)) {
     Add-Content -Path AP-Prereq-Install.cmd -Value ("md " + $InstToolsFldr + " -Force")
 }
+
+# Speedup Download with Invoke-WebRequest
+$ProgressPreference = 'SilentlyContinue'
 
 # Install Python3 latest x64
 $DownloadFile = "Python3-x64.exe"
