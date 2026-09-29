@@ -7,6 +7,7 @@
 # Version 1.1 20231116, Nick Heim. Updated github download links, dotnet3 install
 # Version 1.2 20241110, Nick Heim. Updated github download link and speed up downloads
 # Version 1.3 20250925, Nick Heim. Updated github download link
+# Version 1.4 20260929, Nick Heim. Updated 7-zip and git download link
 
 # Could be neccessary:
 # [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Internet Explorer\Main]
@@ -54,7 +55,7 @@ Add-Content -Path AP-Prereq-Install.cmd -Value ($DownloadFile + " /features Opti
 
 # Install the latest 7-zip x64 MSI
 $DownloadFile = "7zip-x64.msi"
-$URL = "https://www.7-zip.org/$((Invoke-WebRequest https://www.7-zip.org/download.html -UseBasicParsing |Select -ExpandProperty Links |where -Property href -like "*-x64.msi")[0].href)"
+$URL = "$((Invoke-WebRequest https://www.7-zip.org/download.html -UseBasicParsing |Select -ExpandProperty Links |where -Property href -like "*-x64.msi")[0].href)"
 $request = Invoke-WebRequest -Uri "$URL" -OutFile $DownloadFile
 $MSIArguments = @(
     "/i"
@@ -67,7 +68,7 @@ Add-Content -Path AP-Prereq-Install.cmd -Value ("msiexec.exe " + $MSIArguments)
 
 # Install the latest Git x64 Installer
 $DownloadFile = "Git-x64.exe"
-$URL = (((Invoke-WebRequest https://git-scm.com/downloads/win -UseBasicParsing).Links) | where -Property outerHTML -Match "Git for Windows/x64 Setup").href
+$URL = (((Invoke-WebRequest https://git-scm.com/install/windows -UseBasicParsing).Links) | where -Property outerHTML -Match "Git for Windows/x64 Setup").href
 $request = Invoke-WebRequest -Uri "$URL" -OutFile $DownloadFile
 # Add the install command to the batch file
 Add-Content -Path AP-Prereq-Install.cmd -Value ($DownloadFile + ' /ALLUSERS /COMPONENTS="*ext,gitlfs,assoc,assoc_sh" /VERYSILENT')
